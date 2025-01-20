@@ -1,91 +1,62 @@
 import * as THREE from "/build/three.module.js";
 
 import TransformComponent from "../../components/TransformComponent.js";
-import VoxelDataComponent from "../../components/VoxelDataComponent.js";
+import ChunkDataComponent from "../../components/ChunkDataComponent.js";
 import System from "../../core/System.js";
-
-import { createGroundPlaneXZ , setDefaultMaterial } from "/src/libs/util/util.js";
 import VoxelEntity from "../../entities/blocos/VoxelEntity.js";
+import { colorMap } from "../../constants/maps/maps.js";
+import MeshComponent from "../../components/MeshComponent.js";
 
-export default class RenderChunkSystem extends System{
-  
+export default class RenderChunkSystem extends System {
   constructor(scene) {
     super();
     this.scene = scene;
   }
 
-  update(entities , dt) {
-
+  update(entities, dt) {
     entities.forEach((entity) => {
+      if (entity == null) debugger;
 
-      if(entity == null)
-        debugger
-      
       const transform = entity.getComponent(TransformComponent);
-      const chunkData = entity.getComponent(VoxelDataComponent);
+      const chunkData = entity.getComponent(ChunkDataComponent);
+      const meshComponent = entity.getComponent(MeshComponent);
 
-      if (transform && chunkData) {
-        const chunkMesh = this.createChunkMesh(chunkData.voxels);
+      if (transform && chunkData && !meshComponent.rendered) {
+        const chunkMesh =
+          meshComponent.mesh ?? this.createChunkMesh(chunkData.voxels);
 
         chunkMesh.position.set(
           transform.position.x,
           transform.position.y,
           transform.position.z
         );
+
         this.scene.add(chunkMesh);
+        meshComponent.rendered = true;
       }
     });
   }
-  
-  createVoxel = (position , type)=>{
-    const colorMap = {
-      1: 0x00ff00,
-      2: 0xffa500,
-      3: 0xd3d3d3,
-      4: 0x654321,
-      5: 0x056105
-    };
-
-    var c = colorMap[type];
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: c });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(position.x + 0.5 , position.y + 0.5, position.z + 0.5);
-
-    return cube;
-  }
+  renderTrees = () => {};
 
   createChunkMesh = (blocks) => {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const group = new THREE.Group();
 
-    const colorMap = {
-      1: 0x00ff00,
-      2: 0xffa500,
-      3: 0xd3d3d3,
-      4: 0x654321,
-      5: 0x056105
-    };
-
     for (let x = 0; x < blocks.length; x++) {
       for (let y = 0; y < blocks[x].length; y++) {
         for (let z = 0; z < blocks[x][y].length; z++) {
-
-          
           //TODO::trabalhar com dicionario de tipo de blocos
-          if (this.hasAdjacentEmpty(blocks , x , y , z) && blocks[x][y][z] != 0) {
-            //debugger;
-            // var type = blocks[x][y][z];  
-            // group.add(this.createVoxel({x , y , z},type));
+          if (this.hasAdjacentEmpty(blocks, x, y, z) && blocks[x][y][z] != 0) {
+            //if (blocks[x][y][z] != 0) {
+            var type = blocks[x][y][z];
+            var color = colorMap[type];
 
-            var p = blocks[x][y][z];
-            var c = colorMap[p];
-
-            const material = new THREE.MeshBasicMaterial({ color: c });
+            const material = new THREE.MeshBasicMaterial({ color: color });
             const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(x + 0.5 , y + 0.5, z + 0.5);
-            
+            cube.position.set(x + 0.5, y + 0.5, z + 0.5);
             group.add(cube);
+            // const voxel = VoxelEntity.build({ x, y, z }, type);
+            // group.add(voxel);
           }
         }
       }

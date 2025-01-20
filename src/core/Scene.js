@@ -1,4 +1,3 @@
-
 //Uma cena é uma coleção de sistemas e entidades
 //isto é, uma cena precisa gerir os objetos em cena e os sistemas responsaveis por sua atualização
 export default class Scene {

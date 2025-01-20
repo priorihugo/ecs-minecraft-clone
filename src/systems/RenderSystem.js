@@ -10,10 +10,11 @@ export default class RenderSystem extends System {
   update(entities, dt) {
     //debugger;
     entities.forEach((entity) => {
-      const meshComponent = entity.getComponent(MeshComponent);
-      if (meshComponent) {
-        this.scene.add(meshComponent.mesh);
-      }
+      // const meshComponent = entity.getComponent(MeshComponent);
+      // if (meshComponent && !meshComponent.rendered) {
+      //   this.scene.add(meshComponent.mesh);
+      //   meshComponent.rendered = true;
+      // }
     });
   }
 }

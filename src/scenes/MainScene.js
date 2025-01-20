@@ -16,7 +16,8 @@ import {
   onWindowResize,
   createGroundPlaneXZ
 } from "/src/libs/util/util.js";
-
+import { awsdMovement, cameraMovement } from "../constants/maps/controls.js";
+import ChunkManagerSystem from "/src/systems/Chunk/ChunkManager.js";
 
 export default class MainScene extends Scene {
   constructor() {
@@ -43,28 +44,19 @@ export default class MainScene extends Scene {
     this.entities = [];
     this.systems = [];
 
-    //TESTE DE CHUNK
-    const blockMap = {
-      vazio: 0,
-      terra: 1,
-      pedra: 2,
-      madeira: 3
-    };
-
-
-    this.addEntity(
-      new ChunkEntity({
-        position: { x: 0, y: 0, z: 0 },
-        voxelData: { voxels: [], size: 35, voxelBlockMap: blockMap }
-      })
-    );
     this.addEntity(this.fpCamera);
     this.addEntity(this.orbitalCamera);
 
-    this.addSystem(new KeyboardInputSystem(this , {}));
+    this.addSystem(
+      new KeyboardInputSystem(this, awsdMovement, {
+        c: "toggleCamera",
+        C: "toggleCamera"
+      })
+    );
     this.addSystem(new MovementSystem());
+    this.addSystem(new ChunkManagerSystem(this));
     this.addSystem(new RenderChunkSystem(this.scene));
-    this.addSystem(new RenderSystem(this.scene));
+    //this.addSystem(new RenderSystem(this.scene));
   }
 
   toggleCamera() {
@@ -81,16 +73,7 @@ export default class MainScene extends Scene {
   }
 
   update(dt) {
-    //GAMBIARRA, o controle do renderer deveria ser um sistema Independente
-    let axesHelper = new THREE.AxesHelper(12);
-    let plane = createGroundPlaneXZ(70, 70);
-
-    this.scene.clear();
-
-    this.scene.add(axesHelper);
-    this.scene.add(plane);
-
-    //debugger;
+    //this.scene.clear();
     super.update(dt);
     this.renderer.render(this.scene, this.activeCamera.camera);
   }
